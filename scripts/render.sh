@@ -30,5 +30,5 @@ echo "## Environment" >> result.md
 ./scripts/print-env.sh >> result.md
 
 mkdir dist
-grip result.md --export dist/index.html --user-content --wide
+grip result.md --export dist/index.html --user-content --wide --title simd-benches
 ./scripts/hack.py dist/index.html
