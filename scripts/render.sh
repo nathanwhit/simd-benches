@@ -1,12 +1,18 @@
 #!/bin/bash -ex
 
-# shellcheck disable=SC2012
-benches=$(ls benches | sed -e 's/\.rs$//')
+benches=(
+    "base64"
+    "hex"
+    "base32"
+    "uuid"
+    "ascii"
+    "utf8"
+)
 
 echo "# Benchmark Results" > result.md
 date -u --rfc-3339=s >> "result.md"
 
-for bench in $benches
+for bench in "${benches[@]}"
 do
     echo "## $bench" >> result.md
     echo >> result.md

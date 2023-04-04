@@ -12,6 +12,7 @@ fn load_dataset() -> Vec<(String, Vec<u8>)> {
         let content = std::fs::read(entry.path()).unwrap();
         ans.push((name, content));
     }
+    ans.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
     ans
 }
 
