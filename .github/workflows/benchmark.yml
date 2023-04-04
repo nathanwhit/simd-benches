@@ -1,0 +1,90 @@
+name: Benchmark
+
+on:
+  push:
+    branches:
+      - main
+  schedule: # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#onschedule
+    - cron: "0 0 * * 0" # at midnight of each sunday
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bench:
+          - base64
+          - hex
+          - base32
+          - uuid
+          - ascii
+        dispatch:
+          - static-unstable
+          - dynamic
+          - fallback
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: taiki-e/install-action@v1
+        with:
+          tool: cargo-criterion
+      - run: |
+          pip3 install tabulate
+      - run: |
+          DISPATCH=${{ matrix.dispatch }} BENCH=${{ matrix.bench }} ./scripts/bench.sh \
+            --plotting-backend disabled -- --warm-up-time 1 --measurement-time 1
+      - name: Show results
+        run: |
+          commit_hash=$(git rev-parse --short HEAD)
+          name=target/simd-benches/$commit_hash/${{ matrix.dispatch }}-${{ matrix.bench }}
+          echo "COMMIT_HASH=$commit_hash" >> $GITHUB_ENV
+          echo "ARTIFACT_PATH=$name.jsonl" >> $GITHUB_ENV
+          cat $name.md
+      - uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-${{ env.COMMIT_HASH }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+  render:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: |
+          commit_hash=$(git rev-parse --short HEAD)
+          echo "COMMIT_HASH=$commit_hash" >> $GITHUB_ENV
+      - uses: actions/download-artifact@v3
+        with:
+          name: benchmark-${{ env.COMMIT_HASH }}
+      - run: |
+          pip3 install tabulate grip
+      - name: Render results
+        run: |
+          ls -l
+          ./scripts/render.sh
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1

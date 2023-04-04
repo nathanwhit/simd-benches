@@ -1,0 +1,103 @@
+[package]
+name = "simd-benches"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[[bench]]
+name = "uuid"
+harness = false
+
+[[bench]]
+name = "hex"
+harness = false
+
+[[bench]]
+name = "base64"
+harness = false
+
+[[bench]]
+name = "base32"
+harness = false
+
+[[bench]]
+name = "ascii"
+harness = false
+
+[dev-dependencies]
+criterion = { version = "0.4.0", default-features = false, features = ["rayon"] }
+
+[dependencies]
+base16 = "0.2.1"
+base16ct = "0.2.0"
+base32ct = "0.2.0"
+base64 = "0.21.0"
+base64ct = "1.6.0"
+based64 = "0.4.5"
+const-str = "0.5.3"
+data-encoding = "2.3.3"
+faster-hex = "0.6.1"
+getrandom = { version = "0.2", features = ["js"] }
+hex = "0.4.3"
+radix64 = { version = "0.6.2", default-features = false }
+rand = "0.8.5"
+uuid = "1.3.0"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+encoding_rs = "0.8.32"
+
+[dependencies.base32-simd]
+git = "https://github.com/Nugine/simd.git"
+rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+default-features = false
+features = ["std"]
+
+[dependencies.base64-simd]
+git = "https://github.com/Nugine/simd.git"
+rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+default-features = false
+features = ["std"]
+
+[dependencies.hex-simd]
+git = "https://github.com/Nugine/simd.git"
+rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+default-features = false
+features = ["std"]
+
+[dependencies.unicode-simd]
+git = "https://github.com/Nugine/simd.git"
+rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+default-features = false
+features = ["std"]
+
+[dependencies.uuid-simd]
+git = "https://github.com/Nugine/simd.git"
+rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+default-features = false
+features = ["std", "uuid"]
+
+[profile.bench]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+
+[features]
+default = []
+detect = [
+    "base32-simd/detect",  #
+    "base64-simd/detect",
+    "hex-simd/detect",
+    "unicode-simd/detect",
+    "uuid-simd/detect",
+    "radix64/simd",        #
+]
+unstable = [
+    "base32-simd/unstable",    #
+    "base64-simd/unstable",
+    "hex-simd/unstable",
+    "unicode-simd/unstable",
+    "uuid-simd/unstable",
+    "criterion/real_blackbox",
+    "encoding_rs/simd-accel",  #
+]
+parallel = ["base64-simd/parallel"]

@@ -1,0 +1,12 @@
+.timeline-comment--caret::before {
+    content: none;
+}
+
+.TimelineItem::before {
+    content: none;
+}
+
+.Layout {
+    --Layout-sidebar-width: 0px;
+    --Layout-gutter: 0px;
+}
