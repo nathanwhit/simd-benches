@@ -8,3 +8,7 @@ quick-bench:
 
 wasi-bench:
     ./scripts/wasi-bench.sh
+
+bench dispatch bench:
+    DISPATCH={{dispatch}} BENCH={{bench}} ./scripts/bench.sh \
+        --plotting-backend disabled -- --warm-up-time 1 --measurement-time 1

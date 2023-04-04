@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import sys
 import json
 
@@ -20,6 +20,7 @@ BENCHES = [
     {"name": "uuid-format", "metric": "latency"},
     {"name": "uuid-parse", "metric": "latency"},
     {"name": "ascii-check", "metric": "throughput"},
+    {"name": "utf8-check", "metric": "throughput"},
 ]
 
 
@@ -54,6 +55,13 @@ def convert_criterion_jsonl(messages: List[Any]):
         case = parts[3]
 
         time: float = msg["typical"]["estimate"]
+        assert msg["typical"]["unit"] == "ns"
+
+        if len(msg["throughput"]) > 0:
+            input_len: Optional[int] = msg["throughput"][0]["per_iteration"]
+            assert msg["throughput"][0]["unit"] == "bytes"
+        else:
+            input_len = None
 
         yield {
             "bench": bench,
@@ -61,6 +69,7 @@ def convert_criterion_jsonl(messages: List[Any]):
             "variant": variant,
             "case": case,
             "time": time,
+            "input_len": input_len,
         }
 
 
@@ -93,8 +102,8 @@ def gather_results(items: List[Any]) -> List[BenchResult]:
         time = item["time"]
 
         if metric == "throughput":
-            count = int(case)
-            throughput = count / time * 1e9 / (1 << 30)  # GiB/s
+            input_len = item["input_len"]
+            throughput = input_len / time * 1e9 / (1 << 30)  # GiB/s
             data = throughput
         elif metric == "latency":
             data = time
@@ -120,6 +129,13 @@ def render_markdown(results: List[BenchResult]):
     for result in results:
         metric2unit = {"throughput": "GiB/s", "latency": "ns"}
         unit = metric2unit[result.metric]
+
+        if result.metric == "latency":
+            if all(time > 10000 for _, data in result.data.items() for _, time in data.items()):
+                unit = "µs"
+                for _, data in result.data.items():
+                    for case in data:
+                        data[case] /= 1000
 
         headers = [""] + result.cases
 

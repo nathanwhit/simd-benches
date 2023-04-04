@@ -35,6 +35,10 @@ case $DISPATCH in
         ;;
 esac
 
+if [ "$BENCH" = "utf8" ]; then
+    ./scripts/wikipedia_mars.py
+fi
+
 name=target/simd-benches/$commit_hash/$DISPATCH-$BENCH
 
 time cargo criterion -p simd-benches --bench "$BENCH" \
