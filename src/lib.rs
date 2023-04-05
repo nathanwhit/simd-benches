@@ -32,3 +32,23 @@ pub mod faster_hex {
         ::faster_hex::hex_check_fallback(src)
     }
 }
+
+pub fn std_utf8_to_utf16(src: &str, dst: &mut [u16]) -> usize {
+    assert!(src.len() <= dst.len() / 2);
+
+    let mut count = 0;
+    for (x, y) in src.encode_utf16().zip(dst.iter_mut()) {
+        *y = x;
+        count += 1;
+    }
+    count
+}
+
+pub fn simdutf_utf8_to_utf16(src: &str, dst: &mut [u16]) -> usize {
+    assert!(src.len() <= dst.len() / 2);
+
+    let len = src.len();
+    let src = src.as_ptr();
+    let dst = dst.as_mut_ptr();
+    unsafe { simdutf::convert_valid_utf8_to_utf16(src, len, dst) }
+}

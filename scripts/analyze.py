@@ -21,6 +21,7 @@ BENCHES = [
     {"name": "uuid-parse", "metric": "latency"},
     {"name": "ascii-check", "metric": "throughput"},
     {"name": "utf8-check", "metric": "throughput"},
+    {"name": "utf8-to-utf16", "metric": "throughput"},
 ]
 
 

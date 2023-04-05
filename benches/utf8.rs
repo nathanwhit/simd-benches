@@ -1,24 +1,27 @@
 use simd_benches::FnGroup;
 
-use criterion::{black_box, criterion_group, criterion_main, AxisScale, PlotConfiguration};
+use criterion::{black_box, criterion_group, criterion_main};
 use criterion::{BenchmarkId, Criterion, Throughput};
+use once_cell::sync::Lazy;
 
-fn load_dataset() -> Vec<(String, Vec<u8>)> {
-    let dir = std::fs::read_dir("dataset/wikipedia_mars").unwrap();
-    let mut ans = Vec::new();
-    for entry in dir {
-        let entry = entry.unwrap();
-        let name = entry.file_name().to_str().unwrap().to_string();
-        let content = std::fs::read(entry.path()).unwrap();
-        ans.push((name, content));
-    }
-    ans.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
-    ans
+fn load_dataset() -> &'static [(String, String)] {
+    static DATASET: Lazy<Vec<(String, String)>> = Lazy::new(|| {
+        let dir = std::fs::read_dir("dataset/wikipedia_mars").unwrap();
+        let mut ans = Vec::new();
+        for entry in dir {
+            let entry = entry.unwrap();
+            let name = entry.file_name().to_str().unwrap().to_string();
+            let content = std::fs::read_to_string(entry.path()).unwrap();
+            ans.push((name, content));
+        }
+        ans.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
+        ans
+    });
+    DATASET.as_slice()
 }
 
 pub fn bench_check(c: &mut Criterion) {
     let mut group = c.benchmark_group("utf8-check");
-    group.plot_config(PlotConfiguration::default().summary_scale(AxisScale::Logarithmic));
 
     let dataset = load_dataset();
 
@@ -38,14 +41,45 @@ pub fn bench_check(c: &mut Criterion) {
     ];
 
     for &(name, f) in functions {
-        for (case, input) in &dataset {
+        for (case, input) in dataset {
+            let input = input.as_bytes();
+
             group.throughput(Throughput::Bytes(input.len() as u64));
             let id = BenchmarkId::new(name, case);
 
-            group.bench_with_input(id, input.as_slice(), |b, src| b.iter(|| f(black_box(src))));
+            group.bench_with_input(id, input, |b, src| b.iter(|| f(black_box(src))));
         }
     }
 }
 
-criterion_group!(benches, bench_check);
+pub fn bench_to_utf16(c: &mut Criterion) {
+    let mut group = c.benchmark_group("utf8-to-utf16");
+
+    let dataset = load_dataset();
+
+    let functions: &FnGroup<fn(&str, &mut [u16])> = &[
+        ("simdutf/auto", |src, dst| {
+            simd_benches::simdutf_utf8_to_utf16(src, dst);
+        }),
+        ("std/fallback", |src, dst| {
+            simd_benches::std_utf8_to_utf16(src, dst);
+        }),
+    ];
+
+    let max_len = dataset.iter().map(|(_, s)| s.len()).max().unwrap();
+    let mut dst: Vec<u16> = vec![0; max_len * 2];
+
+    for &(name, f) in functions {
+        for (case, input) in dataset {
+            group.throughput(Throughput::Bytes(input.len() as u64));
+            let id = BenchmarkId::new(name, case);
+
+            group.bench_with_input(id, input.as_str(), |b, src| {
+                b.iter(|| f(black_box(src), black_box(dst.as_mut_slice())))
+            });
+        }
+    }
+}
+
+criterion_group!(benches, bench_check, bench_to_utf16);
 criterion_main!(benches);
