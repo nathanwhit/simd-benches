@@ -36,6 +36,9 @@ jobs:
           - static-unstable
           - dynamic
           - fallback
+        exclude:
+          - bench: utf8
+            dispatch: fallback
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@nightly

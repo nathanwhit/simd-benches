@@ -18,6 +18,9 @@ do
     echo >> result.md
     for dispatch in dynamic static-unstable fallback
     do
+        if [ ! -f "$dispatch-$bench.jsonl" ]; then
+            continue
+        fi
         {
             echo "### $dispatch"
             echo
