@@ -7,6 +7,7 @@ benches=(
     "uuid"
     "ascii"
     "utf8"
+    "utf16"
 )
 
 echo "# Benchmark Results" > result.md

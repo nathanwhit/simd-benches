@@ -32,12 +32,15 @@ jobs:
           - uuid
           - ascii
           - utf8
+          - utf16
         dispatch:
           - static-unstable
           - dynamic
           - fallback
         exclude:
           - bench: utf8
+            dispatch: fallback
+          - bench: utf16
             dispatch: fallback
     steps:
       - uses: actions/checkout@v3

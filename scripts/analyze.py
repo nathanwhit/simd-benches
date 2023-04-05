@@ -22,6 +22,8 @@ BENCHES = [
     {"name": "ascii-check", "metric": "throughput"},
     {"name": "utf8-check", "metric": "throughput"},
     {"name": "utf8-to-utf16", "metric": "throughput"},
+    {"name": "utf16-check", "metric": "throughput"},
+    {"name": "utf16-to-utf8", "metric": "throughput"},
 ]
 
 

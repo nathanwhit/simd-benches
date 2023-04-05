@@ -5,18 +5,7 @@ use criterion::{BenchmarkId, Criterion, Throughput};
 use once_cell::sync::Lazy;
 
 fn load_dataset() -> &'static [(String, String)] {
-    static DATASET: Lazy<Vec<(String, String)>> = Lazy::new(|| {
-        let dir = std::fs::read_dir("dataset/wikipedia_mars").unwrap();
-        let mut ans = Vec::new();
-        for entry in dir {
-            let entry = entry.unwrap();
-            let name = entry.file_name().to_str().unwrap().to_string();
-            let content = std::fs::read_to_string(entry.path()).unwrap();
-            ans.push((name, content));
-        }
-        ans.sort_by(|lhs, rhs| lhs.0.cmp(&rhs.0));
-        ans
-    });
+    static DATASET: Lazy<Vec<(String, String)>> = Lazy::new(simd_benches::wikipedia_mars);
     DATASET.as_slice()
 }
 

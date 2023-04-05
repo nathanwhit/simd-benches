@@ -38,6 +38,9 @@ esac
 if [ "$BENCH" = "utf8" ]; then
     ./scripts/wikipedia_mars.py
 fi
+if [ "$BENCH" = "utf16" ]; then
+    ./scripts/wikipedia_mars.py
+fi
 
 name=target/simd-benches/$commit_hash/$DISPATCH-$BENCH
 
