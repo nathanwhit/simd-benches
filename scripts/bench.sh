@@ -11,14 +11,17 @@ mkdir -p target/simd-benches/"$commit_hash"
 case $DISPATCH in
     static)
         export RUSTFLAGS="-C target-cpu=native"
+        export CXXFLAGS='-march=native'
         features=""
         ;;
     static-unstable)
         export RUSTFLAGS="-C target-cpu=native"
+        export CXXFLAGS='-march=native'
         features="unstable"
         ;;
     static-experimental)
         export RUSTFLAGS="-C target-cpu=native"
+        export CXXFLAGS='-march=native'
         features="unstable,parallel"
         ;;
     dynamic)
