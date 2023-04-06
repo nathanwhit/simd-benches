@@ -3,10 +3,13 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 import sys
 import json
+import datetime
+from pathlib import Path
+import os
 
 from tabulate import tabulate
 
-BENCHES = [
+BENCH_FUNCTIONS = [
     {"name": "base64-check", "metric": "throughput"},
     {"name": "base64-decode", "metric": "throughput"},
     {"name": "base64-encode", "metric": "throughput"},
@@ -93,7 +96,7 @@ def gather_results(items: List[Any]) -> List[BenchResult]:
 
     for item in items:
         name = item["bench"]
-        metric = find(BENCHES, lambda x: x["name"] == name)["metric"]
+        metric = find(BENCH_FUNCTIONS, lambda x: x["name"] == name)["metric"]
         r = results.setdefault(name, BenchResult(name, metric, [], [], {}))
 
         function = f'{item["crate"]}/{item["variant"]}'
@@ -116,7 +119,9 @@ def gather_results(items: List[Any]) -> List[BenchResult]:
         row = r.data.setdefault(function, {})
         row[case] = data
 
-    return list(results.values())
+    results_list = list(results.values())
+    results_list.sort(key=lambda x: position(BENCH_FUNCTIONS, lambda y: y["name"] == x.name))
+    return results_list
 
 
 def position(l, f):
@@ -126,53 +131,113 @@ def position(l, f):
     raise Exception()
 
 
-def render_markdown(results: List[BenchResult]):
-    results.sort(key=lambda x: position(BENCHES, lambda y: y["name"] == x.name))
-
-    for result in results:
-        metric2unit = {"throughput": "GiB/s", "latency": "ns"}
-        unit = metric2unit[result.metric]
-
-        if result.metric == "latency":
-            if all(time > 10000 for _, data in result.data.items() for _, time in data.items()):
-                unit = "µs"
-                for _, data in result.data.items():
-                    for case in data:
-                        data[case] /= 1000
-
-        headers = [""] + result.cases
-
-        table = []
-        for function, data in result.data.items():
-            row = [function]
-            for case in result.cases:
-                col = list(result.data[f][case] for f in result.functions)
-
-                if result.metric == "throughput":
-                    needs_bold = data[case] == max(col)
-                elif result.metric == "latency":
-                    needs_bold = data[case] == min(col)
-                else:
-                    raise Exception()
-
-                if needs_bold:
-                    cell = f"**{data[case]:5.3f}**"
-                else:
-                    cell = f"  {data[case]:5.3f}  "
-
-                row.append(cell)
-
-            table.append(row)
-
-        print(f"#### {result.name} ({unit})")
-        print()
-        print(tabulate(table, headers, tablefmt="github"))
-        print()
+@dataclass
+class BenchResultTable:
+    name: str
+    headers: List[str]
+    table: List[List[str]]
 
 
-if __name__ == "__main__":
-    path = sys.argv[1]
+def generate_table(result: BenchResult) -> BenchResultTable:
+    headers = [""] + result.cases
+
+    table = []
+    for function, data in result.data.items():
+        row = [function]
+        for case in result.cases:
+            col = list(result.data[f][case] for f in result.functions)
+
+            if result.metric == "throughput":
+                needs_bold = data[case] == max(col)
+            elif result.metric == "latency":
+                needs_bold = data[case] == min(col)
+            else:
+                raise Exception()
+
+            if needs_bold:
+                cell = f"**{data[case]:5.3f}**"
+            else:
+                cell = f"  {data[case]:5.3f}  "
+
+            row.append(cell)
+
+        table.append(row)
+
+    return BenchResultTable(result.name, headers, table)
+
+
+def now_rfc3339() -> str:
+    return datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+METRIC_TO_UNIT = {"throughput": "GiB/s", "latency": "ns"}
+
+
+def single_mode(path: str):
     messages = list(read_jsonl(path))
     items = list(convert_criterion_jsonl(messages))
     results = gather_results(items)
-    render_markdown(results)
+
+    for result in results:
+        t = generate_table(result)
+        unit = METRIC_TO_UNIT[result.metric]
+
+        print(f"#### {t.name} ({unit})")
+        print()
+        print(tabulate(t.table, t.headers, tablefmt="github"))
+        print()
+
+
+def render_mode():
+    benches = []
+    for bench_function in BENCH_FUNCTIONS:
+        bench = bench_function["name"].split("-")[0]
+        append_if_not_exists(benches, bench)
+
+    dispatches = ["dynamic", "static-unstable", "fallback"]
+
+    # [bench_function][dispatch] = table
+    tables: Dict[str, Dict[str, BenchResultTable]] = {}
+
+    for bench in benches:
+        for dispatch in dispatches:
+            path = Path(f"{dispatch}-{bench}.jsonl")
+            if not path.exists():
+                continue
+
+            messages = list(read_jsonl(str(path)))
+            items = list(convert_criterion_jsonl(messages))
+            results = gather_results(items)
+
+            for result in results:
+                t = generate_table(result)
+                tables.setdefault(t.name, {})[dispatch] = t
+
+    print("# Benchmark Results")
+    print(now_rfc3339())
+    print()
+
+    for bench_function, d in tables.items():
+        metric = find(BENCH_FUNCTIONS, lambda x: x["name"] == bench_function)["metric"]
+        unit = METRIC_TO_UNIT[metric]
+
+        print(f"### {bench_function} ({unit})")
+        print()
+
+        for dispatch, t in d.items():
+            print(f"#### {dispatch}")
+            print()
+            print(tabulate(t.table, t.headers, tablefmt="github"))
+            print()
+
+    print("## Environment")
+    print(flush=True)
+    os.system("./scripts/print-env.sh")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        render_mode()
+    elif len(sys.argv) == 2:
+        path = sys.argv[1]
+        single_mode(path)
