@@ -33,7 +33,7 @@ name = "utf16"
 harness = false
 
 [dev-dependencies]
-criterion = { version = "0.4.0", default-features = false, features = ["rayon"] }
+criterion = { version = "0.5.1", default-features = false, features = ["rayon"] }
 
 [dependencies]
 base16 = "0.2.1"
@@ -44,7 +44,7 @@ base64ct = "1.6.0"
 based64 = "0.4.5"
 const-str = "0.5.3"
 data-encoding = "2.3.3"
-faster-hex = "0.6.1"
+faster-hex = "0.8.0"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4.3"
 radix64 = { version = "0.6.2", default-features = false }
