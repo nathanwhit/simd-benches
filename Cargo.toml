@@ -39,7 +39,7 @@ criterion = { version = "0.5.1", default-features = false, features = ["rayon"] 
 base16 = "0.2.1"
 base16ct = "0.2.0"
 base32ct = "0.2.0"
-base64 = "0.21.0"
+base64 = "0.22.0"
 base64ct = "1.6.0"
 based64 = "0.4.5"
 const-str = "0.5.3"
