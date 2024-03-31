@@ -61,31 +61,31 @@ encoding_rs = "0.8.32"
 
 [dependencies.base32-simd]
 git = "https://github.com/Nugine/simd.git"
-rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+rev = "d3005dd5489048d742077c77168fad28ea6b47ff"
 default-features = false
 features = ["std"]
 
 [dependencies.base64-simd]
 git = "https://github.com/Nugine/simd.git"
-rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+rev = "d3005dd5489048d742077c77168fad28ea6b47ff"
 default-features = false
 features = ["std"]
 
 [dependencies.hex-simd]
 git = "https://github.com/Nugine/simd.git"
-rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+rev = "d3005dd5489048d742077c77168fad28ea6b47ff"
 default-features = false
 features = ["std"]
 
 [dependencies.unicode-simd]
 git = "https://github.com/Nugine/simd.git"
-rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+rev = "d3005dd5489048d742077c77168fad28ea6b47ff"
 default-features = false
 features = ["std"]
 
 [dependencies.uuid-simd]
 git = "https://github.com/Nugine/simd.git"
-rev = "cf6cc4a0d835182e7b64ba8679423c3c2c76a198"
+rev = "d3005dd5489048d742077c77168fad28ea6b47ff"
 default-features = false
 features = ["std", "uuid"]
 
