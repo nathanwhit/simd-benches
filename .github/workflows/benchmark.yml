@@ -78,6 +78,7 @@ jobs:
           commit_hash=$(git rev-parse --short HEAD)
           echo "COMMIT_HASH=$commit_hash" >> $GITHUB_ENV
       - uses: actions/download-artifact@v4
+      - run: unzip benchmark-*
       - run: |
           pip3 install tabulate grip
       - name: Render results
