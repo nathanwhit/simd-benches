@@ -23,9 +23,9 @@ pub fn bench_check(c: &mut Criterion) {
         ("simdutf/auto", |src: &[u16]| {
             assert!(simdutf::validate_utf16(src));
         }),
-        ("encoding_rs/auto", |src: &[u16]| {
-            assert!(encoding_rs::mem::utf16_valid_up_to(src) == src.len()); //
-        }),
+        // ("encoding_rs/auto", |src: &[u16]| {
+        //     assert!(encoding_rs::mem::utf16_valid_up_to(src) == src.len()); //
+        // }),
         ("widestring/fallback", |src: &[u16]| {
             assert!(widestring::Utf16Str::from_slice(src).is_ok());
         }),

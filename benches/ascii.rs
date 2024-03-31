@@ -21,9 +21,9 @@ pub fn bench_check(c: &mut Criterion) {
         ("unicode-simd/auto", |src: &[u8]| {
             assert!(unicode_simd::is_ascii(src));
         }),
-        ("encoding_rs/auto", |src: &[u8]| {
-            assert!(encoding_rs::mem::is_ascii(src)); //
-        }),
+        // ("encoding_rs/auto", |src: &[u8]| {
+        //     assert!(encoding_rs::mem::is_ascii(src)); //
+        // }),
         ("std/fallback", |src: &[u8]| {
             assert!(src.is_ascii());
         }),

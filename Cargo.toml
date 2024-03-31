@@ -96,6 +96,21 @@ codegen-units = 1
 
 [features]
 default = []
-detect = ["base32-simd/detect", "base64-simd/detect", "hex-simd/detect", "unicode-simd/detect", "uuid-simd/detect", "radix64/simd"]
-unstable = ["base32-simd/unstable", "base64-simd/unstable", "hex-simd/unstable", "unicode-simd/unstable", "uuid-simd/unstable", "criterion/real_blackbox", "encoding_rs/simd-accel"]
+detect = [
+    "base32-simd/detect",
+    "base64-simd/detect",
+    "hex-simd/detect",
+    "unicode-simd/detect",
+    "uuid-simd/detect",
+    "radix64/simd",        #
+]
+unstable = [
+    "base32-simd/unstable",
+    "base64-simd/unstable",
+    "hex-simd/unstable",
+    "unicode-simd/unstable",
+    "uuid-simd/unstable",
+    "criterion/real_blackbox", #
+    # "encoding_rs/simd-accel",  #
+]
 parallel = ["base64-simd/parallel"]
