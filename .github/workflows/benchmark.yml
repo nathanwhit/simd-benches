@@ -62,7 +62,7 @@ jobs:
           cat $name.md
       - uses: actions/upload-artifact@v4
         with:
-          name: benchmark-${{ env.COMMIT_HASH }}
+          name: benchmark-${{ env.COMMIT_HASH }}-${{ matrix.dispatch }}-${{ matrix.bench }}
           path: ${{ env.ARTIFACT_PATH }}
 
   render:
@@ -78,8 +78,6 @@ jobs:
           commit_hash=$(git rev-parse --short HEAD)
           echo "COMMIT_HASH=$commit_hash" >> $GITHUB_ENV
       - uses: actions/download-artifact@v4
-        with:
-          name: benchmark-${{ env.COMMIT_HASH }}
       - run: |
           pip3 install tabulate grip
       - name: Render results
