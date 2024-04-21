@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RUST_VERSION: 1.74.1 # FIXME: https://github.com/Nugine/simd/issues/43
+  RUST_VERSION: nightly
 
 jobs:
   benchmark:
