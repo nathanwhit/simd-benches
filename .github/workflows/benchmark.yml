@@ -19,6 +19,9 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
+env:
+  RUST_VERSION: 1.74.1 # FIXME: https://github.com/Nugine/simd/issues/43
+
 jobs:
   benchmark:
     runs-on: ubuntu-latest
@@ -34,7 +37,7 @@ jobs:
           - utf8
           - utf16
         dispatch:
-          - static-unstable
+          - static
           - dynamic
           - fallback
         exclude:
@@ -44,7 +47,9 @@ jobs:
             dispatch: fallback
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-criterion
@@ -73,7 +78,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
       - run: |
           commit_hash=$(git rev-parse --short HEAD)
           echo "COMMIT_HASH=$commit_hash" >> $GITHUB_ENV

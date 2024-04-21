@@ -120,7 +120,9 @@ def gather_results(items: List[Any]) -> List[BenchResult]:
         row[case] = data
 
     results_list = list(results.values())
-    results_list.sort(key=lambda x: position(BENCH_FUNCTIONS, lambda y: y["name"] == x.name))
+    results_list.sort(
+        key=lambda x: position(BENCH_FUNCTIONS, lambda y: y["name"] == x.name)
+    )
     return results_list
 
 
@@ -194,7 +196,7 @@ def render_mode():
         bench = bench_function["name"].split("-")[0]
         append_if_not_exists(benches, bench)
 
-    dispatches = ["dynamic", "static-unstable", "fallback"]
+    dispatches = ["dynamic", "static-unstable", "static", "fallback"]
 
     # [bench_function][dispatch] = table
     tables: Dict[str, Dict[str, BenchResultTable]] = {}
