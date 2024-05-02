@@ -57,7 +57,7 @@ bytemuck = "1.13.1"
 widestring = "1.0.2"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-encoding_rs = "0.8.32"
+encoding_rs = "0.8.34"
 
 [dependencies.base32-simd]
 git = "https://github.com/Nugine/simd.git"
@@ -110,7 +110,7 @@ unstable = [
     "hex-simd/unstable",
     "unicode-simd/unstable",
     "uuid-simd/unstable",
-    "criterion/real_blackbox", #
-    # "encoding_rs/simd-accel",  #
+    "criterion/real_blackbox",
+    "encoding_rs/simd-accel",  #
 ]
 parallel = ["base64-simd/parallel"]
