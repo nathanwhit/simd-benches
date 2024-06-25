@@ -95,7 +95,7 @@ pub fn bench_decode(c: &mut Criterion) {
                     src.len(),
                     dst.as_mut_ptr(),
                     &mut out_len,
-                    simdutf::Base64Options::Normal,
+                    simdutf::Base64Options::Default,
                 )
             };
             assert_eq!(res.error, simdutf::ErrorCode::Success);
