@@ -152,6 +152,19 @@ pub fn bench_forgiving_decode(c: &mut Criterion) {
         ("base64-simd/auto", |src, dst| {
             base64_simd::forgiving_decode(src, dst.as_out()).unwrap();
         }), //
+        ("simdutf/base64_to_binary_safe", |src, dst| {
+            let mut out_len = dst.len();
+            let res = unsafe {
+                simdutf::base64_to_binary_safe(
+                    src.as_ptr(),
+                    src.len(),
+                    dst.as_mut_ptr(),
+                    &mut out_len,
+                    simdutf::Base64Options::Default,
+                )
+            };
+            assert_eq!(res.error, simdutf::ErrorCode::Success);
+        }),
     ];
 
     for &(name, f) in functions {
