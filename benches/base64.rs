@@ -87,6 +87,19 @@ pub fn bench_decode(c: &mut Criterion) {
         ("based64/fallback", |src, dst| {
             based64::STANDARD_CODEC.decode_to(src, dst).unwrap();
         }),
+        ("simdutf/base64_to_binary_safe", |src, dst| {
+            let mut out_len = dst.len();
+            let res = unsafe {
+                simdutf::base64_to_binary_safe(
+                    src.as_ptr(),
+                    src.len(),
+                    dst.as_mut_ptr(),
+                    &mut out_len,
+                    simdutf::Base64Options::Normal,
+                )
+            };
+            assert_eq!(res.error, simdutf::ErrorCode::Success);
+        }),
     ];
 
     for &(name, f) in functions {
